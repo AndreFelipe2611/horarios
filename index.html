@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agendamento de Horários</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #006868;
+            --primary-dark: #004d4d;
+            --primary-light: #e6f4f4;
+            --primary-gradient: linear-gradient(135deg, #006868 0%, #004d4d 100%);
+            --accent: #00a896;
+            --bg-page: #f0f4f4;
+            --card-bg: #ffffff;
+            --text-title: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+            --focus-ring: rgba(0, 104, 104, 0.25);
+            
+            --success-bg: #ecfdf5;
+            --success-text: #047857;
+            --success-border: #a7f3d0;
+            
+            --danger-bg: #fef2f2;
+            --danger-text: #b91c1c;
+            --danger-border: #fecaca;
+            
+            --disabled-bg: #f1f5f9;
+            --disabled-text: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            --shadow-card: 0 12px 32px -4px rgba(0, 104, 104, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+            --shadow-btn: 0 4px 14px rgba(0, 104, 104, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 104, 104, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 168, 150, 0.06) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-body);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 16px 12px;
+        }
+
+        /* Container Principal Mobile First */
+        .app-shell {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header Elegante com Gradiente */
+        .app-header {
+            background: var(--primary-gradient);
+            padding: 26px 20px 22px 20px;
+            color: #ffffff;
+            text-align: center;
+            position: relative;
+        }
+
+        .app-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: var(--card-bg);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .app-header h1 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .app-header p {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.88);
+            font-weight: 400;
+        }
+
+        /* Corpo do App */
+        .app-body {
+            padding: 10px 18px 24px 18px;
+        }
+
+        /* Seção do Formulário */
+        .form-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 12px;
+        }
+
+        .section-label svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+        }
+
+        .field-group {
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .field-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .field-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-title);
+            margin-bottom: 5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px 0 42px;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--text-title);
+            background: #fafafa;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--focus-ring);
+        }
+
+        .input-wrapper input:focus + .input-icon {
+            color: var(--primary);
+        }
+
+        /* Banner de Alerta Dinâmico */
+        .alert-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .alert-banner.locked {
+            background-color: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ffedd5;
+        }
+
+        .alert-banner.unlocked {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid var(--success-border);
+        }
+
+        .alert-banner svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Cabeçalho da Lista de Horários */
+        .slots-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slots-header h2 {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--text-title);
+        }
+
+        .slots-counter {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 104, 104, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 104, 104, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 104, 104, 0); }
+        }
+
+        /* Grade de Slots */
+        .slots-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Card Individual de Horário */
+        .slot-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: #ffffff;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .slot-card:not(.booked):hover {
+            border-color: rgba(0, 104, 104, 0.4);
+            box-shadow: 0 4px 14px rgba(0, 104, 104, 0.06);
+        }
+
+        .slot-left {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .slot-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-title);
+        }
+
+        .slot-time svg {
+            width: 18px;
+            height: 18px;
+            color: var(--primary);
+        }
+
+        .slot-owner {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--danger-text);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .slot-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Botão Agendar Otimizado */
+        .btn-confirm {
+            height: 42px;
+            padding: 0 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--primary-gradient);
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: var(--shadow-btn);
+            min-width: 110px;
+        }
+
+        .btn-confirm:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 104, 104, 0.45);
+        }
+
+        .btn-confirm:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        /* ESTADO INCLICÁVEL / DESABILITADO */
+        .btn-confirm:disabled {
+            background: var(--disabled-bg) !important;
+            color: var(--disabled-text) !important;
+            cursor: not-allowed !important;
+            opacity: 0.75;
+            box-shadow: none !important;
+            transform: none !important;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Slot Reservado */
+        .slot-card.booked {
+            background-color: var(--danger-bg);
+            border-color: var(--danger-border);
+        }
+
+        .slot-card.booked .slot-time {
+            color: var(--danger-text);
+        }
+
+        .slot-card.booked .slot-time svg {
+            color: var(--danger-text);
+        }
+
+        /* Toast Moderno */
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            max-width: 90%;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast-notification.success {
+            background: var(--primary);
+        }
+
+        .toast-notification.error {
+            background: #dc2626;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2.5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="app-shell">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Vagas Exclusivas
+            </div>
+            <h1>Agendamento Online</h1>
+            <p>Marque seu horário individual em segundos</p>
+        </header>
+
+        <!-- Corpo -->
+        <div class="app-body">
+            <!-- Formulário de Identificação -->
+            <section class="form-card">
+                <div class="section-label">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Identificação do Usuário
+                </div>
+
+                <div class="field-group">
+                    <label for="nome">Nome Completo</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="nome" placeholder="Digite seu nome completo" autocomplete="name">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="matricula">Matrícula</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="matricula" placeholder="Digite sua matrícula" inputmode="numeric">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Banner Alerta de Validação -->
+            <div id="alertBanner" class="alert-banner locked">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="alertText">Preencha Nome e Matrícula para liberar os botões.</span>
+            </div>
+
+            <!-- Cabeçalho de Horários -->
+            <div class="slots-header">
+                <h2>Horários Disponíveis</h2>
+                <div class="slots-counter">
+                    <span class="pulse-dot"></span>
+                    <span id="counterText">7 Livres</span>
+                </div>
+            </div>
+
+            <!-- Grade de Horários -->
+            <div class="slots-grid" id="slotsContainer">
+                <!-- Gerado dinamicamente via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast-notification"></div>
+
+    <script>
+        // URL DO GOOGLE APPS SCRIPT
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNNaC0sJkdaARRTYj0MKPTyfj8jmMPSwO7JIOU7VqCurgaxH7ktJkUZyWyygw3wZACJA/exec";
+
+        // Grade de Horários Exigidos
+        const HORARIOS = [
+            "08:00 às 09:00",
+            "09:00 às 10:00",
+            "10:00 às 11:00",
+            "11:00 às 12:00",
+            "12:00 às 13:00",
+            "13:00 às 14:00",
+            "14:00 às 15:00"
+        ];
+
+        // Estado do App (Sincronizado estritamente com a Planilha Online)
+        let agendamentos = {}; 
+
+        // Elementos DOM
+        const inputNome = document.getElementById('nome');
+        const inputMatricula = document.getElementById('matricula');
+        const alertBanner = document.getElementById('alertBanner');
+        const slotsContainer = document.getElementById('slotsContainer');
+        const counterText = document.getElementById('counterText');
+        const toastNotification = document.getElementById('toastNotification');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Limpa qualquer cache local legado
+            localStorage.removeItem('db_agendamentos_v2');
+            localStorage.removeItem('db_agendamentos_v3');
+
+            renderizarSlots();
+            atualizarValidacao();
+
+            inputNome.addEventListener('input', atualizarValidacao);
+            inputMatricula.addEventListener('input', atualizarValidacao);
+
+            // Sincroniza imediatamente com a Planilha do Google ao carregar a página
+            buscarSincronizacaoPlanilha();
+
+            // Atualização automática em tempo real a cada 4 segundos
+            setInterval(buscarSincronizacaoPlanilha, 4000);
+        });
+
+        // Busca o estado real da Planilha do Google (Se você apagar linhas lá, zera aqui na hora!)
+        async function buscarSincronizacaoPlanilha() {
+            if (!GOOGLE_SCRIPT_URL) return;
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL);
+                if (res.ok) {
+                    const dadosPlanilha = await res.json();
+                    // A planilha online é a única fonte da verdade
+                    agendamentos = (dadosPlanilha && typeof dadosPlanilha === 'object') ? dadosPlanilha : {};
+                    renderizarSlots();
+                    atualizarValidacao();
+                }
+            } catch(e) {
+                console.error("Erro ao sincronizar com a planilha:", e);
+            }
+        }
+
+        // Valida se Nome e Matrícula foram informados
+        function isFormValido() {
+            return inputNome.value.trim().length > 0 && inputMatricula.value.trim().length > 0;
+        }
+
+        function atualizarValidacao() {
+            const valido = isFormValido();
+
+            if (valido) {
+                alertBanner.className = "alert-banner unlocked";
+                alertBanner.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Dados validados! Escolha seu horário abaixo.</span>
+                `;
+            } else {
+                alertBanner.className = "alert-banner locked";
+                alertBanner.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>Preencha Nome e Matrícula para liberar os botões.</span>
+                `;
+            }
+
+            HORARIOS.forEach(horario => {
+                const btn = document.getElementById(`btn-${cleanId(horario)}`);
+                const jaReservado = !!agendamentos[horario];
+
+                if (btn) {
+                    if (jaReservado) {
+                        btn.disabled = true;
+                        btn.innerHTML = `<span>❌ Indisponível</span>`;
+                    } else {
+                        btn.disabled = !valido; // TRAVA OS BOTÕES ATÉ PREENCHER NOME E MATRÍCULA
+                        btn.innerHTML = `<span>Agendar</span>`;
+                    }
+                }
+            });
+        }
+
+        function cleanId(str) {
+            return str.replace(/[^a-zA-Z0-9]/g, '');
+        }
+
+        function renderizarSlots() {
+            slotsContainer.innerHTML = '';
+            let totalLivres = 0;
+
+            HORARIOS.forEach(horario => {
+                const reserva = agendamentos[horario];
+                const estaReservado = !!reserva;
+                if (!estaReservado) totalLivres++;
+
+                const slotCard = document.createElement('div');
+                slotCard.className = `slot-card ${estaReservado ? 'booked' : ''}`;
+
+                let infoHTML = `
+                    <div class="slot-time">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>${horario}</span>
+                    </div>
+                `;
+
+                if (estaReservado) {
+                    infoHTML += `<div class="slot-owner">Reservado por: ${reserva.nome} (${reserva.matricula})</div>`;
+                } else {
+                    infoHTML += `<div class="slot-badge">Vaga disponível</div>`;
+                }
+
+                slotCard.innerHTML = `
+                    <div class="slot-left">${infoHTML}</div>
+                    <button 
+                        id="btn-${cleanId(horario)}" 
+                        class="btn-confirm" 
+                        ${estaReservado || !isFormValido() ? 'disabled' : ''}
+                        onclick="confirmarAgendamento('${horario}')">
+                        <span>${estaReservado ? '❌ Indisponível' : 'Agendar'}</span>
+                    </button>
+                `;
+
+                slotsContainer.appendChild(slotCard);
+            });
+
+            counterText.textContent = `${totalLivres} de ${HORARIOS.length} Livre${totalLivres !== 1 ? 's' : ''}`;
+        }
+
+        // Realiza o agendamento enviando diretamente para a Planilha do Google
+        async function confirmarAgendamento(horario) {
+            const nome = inputNome.value.trim();
+            const matricula = inputMatricula.value.trim();
+
+            if (!nome || !matricula) {
+                showToast("Informe seu nome e matrícula!", "error");
+                atualizarValidacao();
+                return;
+            }
+
+            if (agendamentos[horario]) {
+                showToast("Este horário já foi preenchido por outra pessoa!", "error");
+                renderizarSlots();
+                return;
+            }
+
+            const btn = document.getElementById(`btn-${cleanId(horario)}`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<div class="spinner"></div> Gravando...`;
+            }
+
+            // Trava local temporária enquanto grava na planilha
+            agendamentos[horario] = { nome: nome, matricula: matricula };
+            renderizarSlots();
+            atualizarValidacao();
+
+            showToast(`✨ Horário ${horario} reservado com sucesso!`, "success");
+
+            // Envia para o Google Sheets via parâmetros GET (Infalível contra bloqueios de CORS)
+            if (GOOGLE_SCRIPT_URL) {
+                const urlCompleta = `${GOOGLE_SCRIPT_URL}?action=salvar&nome=${encodeURIComponent(nome)}&matricula=${encodeURIComponent(matricula)}&horario=${encodeURIComponent(horario)}`;
+                try {
+                    await fetch(urlCompleta, { mode: 'no-cors' });
+                    // Re-sincroniza 1.5s após o envio para confirmar
+                    setTimeout(buscarSincronizacaoPlanilha, 1500);
+                } catch (e) {
+                    console.error("Erro no envio:", e);
+                }
+            }
+        }
+
+        function showToast(mensagem, tipo = 'success') {
+            toastNotification.textContent = mensagem;
+            toastNotification.className = `toast-notification show ${tipo}`;
+            setTimeout(() => {
+                toastNotification.className = 'toast-notification';
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
