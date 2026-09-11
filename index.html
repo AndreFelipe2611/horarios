@@ -377,7 +377,7 @@
             transform: translateY(0);
         }
 
-        /* ESTADO INCLICÁVEL / DESABILITADO */
+        /* ESTADO INCLICÁVEL / DESABILITADO (BLOQUEADO TOTALMENTE CONTRA TOQUE/CLIQUE) */
         .btn-confirm:disabled {
             background: var(--disabled-bg) !important;
             color: var(--disabled-text) !important;
@@ -386,6 +386,7 @@
             box-shadow: none !important;
             transform: none !important;
             border: 1px solid var(--border-light);
+            pointer-events: none !important;
         }
 
         /* Slot Reservado */
@@ -518,7 +519,7 @@
     <div id="toastNotification" class="toast-notification"></div>
 
     <script>
-        // URL DO GOOGLE APPS SCRIPT
+        // URL DO GOOGLE APPS SCRIPT DA SUA PLANILHA
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNNaC0sJkdaARRTYj0MKPTyfj8jmMPSwO7JIOU7VqCurgaxH7ktJkUZyWyygw3wZACJA/exec";
 
         // Grade de Horários Exigidos
@@ -557,8 +558,8 @@
             // Sincroniza imediatamente com a Planilha do Google ao carregar a página
             buscarSincronizacaoPlanilha();
 
-            // Atualização automática em tempo real a cada 4 segundos
-            setInterval(buscarSincronizacaoPlanilha, 4000);
+            // Atualização automática em tempo real a cada 3 segundos
+            setInterval(buscarSincronizacaoPlanilha, 3000);
         });
 
         // Busca o estado real da Planilha do Google (Se você apagar linhas lá, zera aqui na hora!)
@@ -568,7 +569,6 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 if (res.ok) {
                     const dadosPlanilha = await res.json();
-                    // A planilha online é a única fonte da verdade
                     agendamentos = (dadosPlanilha && typeof dadosPlanilha === 'object') ? dadosPlanilha : {};
                     renderizarSlots();
                     atualizarValidacao();
@@ -606,10 +606,10 @@
 
                 if (btn) {
                     if (jaReservado) {
-                        btn.disabled = true;
+                        btn.disabled = true; // PERMANECE 100% INCLICÁVEL SE ESTIVER NA PLANILHA
                         btn.innerHTML = `<span>❌ Indisponível</span>`;
                     } else {
-                        btn.disabled = !valido; // TRAVA OS BOTÕES ATÉ PREENCHER NOME E MATRÍCULA
+                        btn.disabled = !valido; // TRAVA SE FALTAR NOME E MATRÍCULA
                         btn.innerHTML = `<span>Agendar</span>`;
                     }
                 }
@@ -673,6 +673,7 @@
                 return;
             }
 
+            // SEGURANÇA: Se já estiver reservado na planilha por outra pessoa, bloqueia totalmente
             if (agendamentos[horario]) {
                 showToast("Este horário já foi preenchido por outra pessoa!", "error");
                 renderizarSlots();
@@ -685,20 +686,17 @@
                 btn.innerHTML = `<div class="spinner"></div> Gravando...`;
             }
 
-            // Trava local temporária enquanto grava na planilha
             agendamentos[horario] = { nome: nome, matricula: matricula };
             renderizarSlots();
             atualizarValidacao();
 
             showToast(`✨ Horário ${horario} reservado com sucesso!`, "success");
 
-            // Envia para o Google Sheets via parâmetros GET (Infalível contra bloqueios de CORS)
             if (GOOGLE_SCRIPT_URL) {
                 const urlCompleta = `${GOOGLE_SCRIPT_URL}?action=salvar&nome=${encodeURIComponent(nome)}&matricula=${encodeURIComponent(matricula)}&horario=${encodeURIComponent(horario)}`;
                 try {
                     await fetch(urlCompleta, { mode: 'no-cors' });
-                    // Re-sincroniza 1.5s após o envio para confirmar
-                    setTimeout(buscarSincronizacaoPlanilha, 1500);
+                    setTimeout(buscarSincronizacaoPlanilha, 1200);
                 } catch (e) {
                     console.error("Erro no envio:", e);
                 }
