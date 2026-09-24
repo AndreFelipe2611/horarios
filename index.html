@@ -504,7 +504,7 @@
                 <h2>Horários Disponíveis</h2>
                 <div class="slots-counter">
                     <span class="pulse-dot"></span>
-                    <span id="counterText">7 Livres</span>
+                    <span id="counterText">6 Livres</span>
                 </div>
             </div>
 
@@ -532,7 +532,8 @@
             "14:00 às 15:00"
         ];
 
-        // Estado do App (Sincronizado estritamente com a Planilha Online)
+        // Estado do App (Sincronizado com a Planilha Online)
+        // Só guarda se o horário está ocupado ou não. Nenhum dado pessoal fica em memória.
         let agendamentos = {}; 
 
         // Elementos DOM
@@ -568,7 +569,16 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 if (res.ok) {
                     const dadosPlanilha = await res.json();
-                    agendamentos = (dadosPlanilha && typeof dadosPlanilha === 'object') ? dadosPlanilha : {};
+                    const ocupados = {};
+
+                    // Guarda apenas a informação "ocupado", descartando nome/matrícula
+                    if (dadosPlanilha && typeof dadosPlanilha === 'object') {
+                        Object.keys(dadosPlanilha).forEach(horario => {
+                            if (dadosPlanilha[horario]) ocupados[horario] = true;
+                        });
+                    }
+
+                    agendamentos = ocupados;
                     renderizarSlots();
                     atualizarValidacao();
                 }
@@ -624,8 +634,7 @@
             let totalLivres = 0;
 
             HORARIOS.forEach(horario => {
-                const reserva = agendamentos[horario];
-                const estaReservado = !!reserva;
+                const estaReservado = !!agendamentos[horario];
                 if (!estaReservado) totalLivres++;
 
                 const slotCard = document.createElement('div');
@@ -639,7 +648,8 @@
                 `;
 
                 if (estaReservado) {
-                    infoHTML += `<div class="slot-owner">Reservado por: ${reserva.nome} (${reserva.matricula})</div>`;
+                    // Sem nome e sem matrícula: só informa que o horário já foi preenchido
+                    infoHTML += `<div class="slot-owner">Horário já preenchido</div>`;
                 } else {
                     infoHTML += `<div class="slot-badge">Vaga disponível</div>`;
                 }
@@ -685,7 +695,8 @@
                 btn.innerHTML = `<div class="spinner"></div> Gravando...`;
             }
 
-            agendamentos[horario] = { nome: nome, matricula: matricula };
+            // Marca localmente só como ocupado (sem dados pessoais)
+            agendamentos[horario] = true;
             renderizarSlots();
             atualizarValidacao();
 
